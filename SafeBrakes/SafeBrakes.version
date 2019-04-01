@@ -1,7 +1,7 @@
 {
     "NAME": "SafeBrakes",
-	"URL": "",
-	"DOWNLOAD": "",
+	"URL": "https://raw.githubusercontent.com/Astronants/SafeBrakes/master/SafeBrakes/SafeBrakes.version?token=AmzwCPC5H35MEuTe-eztcVZc-glsSwfzks5coeRlwA%3D%3D",
+	"DOWNLOAD": "https://github.com/Astronants/SafeBrakes/releases",
 	"GITHUB" : {
 		"USERNAME": "Astronants",
 		"REPOSITORY": "Safebrakes"
@@ -9,8 +9,7 @@
 	"VERSION": {
         "MAJOR": 1,
         "MINOR": 0,
-        "PATCH": 0,
-        "BUILD": 0
+        "PATCH": 0
     },
     "KSP_VERSION": {
         "MAJOR": 1,
