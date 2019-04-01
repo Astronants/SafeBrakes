@@ -1,6 +1,6 @@
-# SafeBrakes v1.0
-# for KSP 1.6.1
-# by Astronants
+## SafeBrakes v1.0
+## for KSP 1.6.1
+## by Astronants
 
 Because we don't want to see our sstos explode on the landing.
 
