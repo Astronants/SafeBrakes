@@ -1,6 +1,6 @@
-SafeBrakes v1.0
+SafeBrakes v1.1
 
-for KSP 1.6.1
+for KSP 1.7.0
 
 by Astronants
 
@@ -9,6 +9,8 @@ by Astronants
 Because we don't want to see our sstos explode on the landing.
 
 
+You can activate the brakes with MODkey + BRAKESkey (alt + b by default on Windows).
+If on, the antilock system (ABS) temporarily deactivates the vessel's brakes to avoid drifting and crashing onto the runway during braking.
 
 ==INSTALLATION==
 
@@ -24,6 +26,10 @@ If you found any bugs, please report it on Github. You can also contact me on th
 
 ==CHANGELOG==
 
+v1.1
+- The antilock system now only works when landing or splashed down.
+- Added an anti-overheat system to the airbrakes: it deactivates the brakes to avoid overheating and reactivates them when they are cooled.
+- moved the MiniAVC.dll so that it can work.
 v1.0
 
 - Initial release
