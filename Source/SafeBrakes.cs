@@ -4,6 +4,7 @@ namespace SafeBrakes
 {
     public class SafeBrakes : PartModule
     {
+        Configs settings = new Configs();
         bool LastActionbrakes;
         bool handBrake = false;
         bool ABSenabled = false;
@@ -14,7 +15,7 @@ namespace SafeBrakes
 
         [KSPField(isPersistant = true,guiActiveEditor = true, guiActive = true, guiName = "ABS rate", guiFormat = "0.00"),
             UI_FloatEdit(minValue = 0.1f, maxValue =  1, incrementSlide = 0.01f, incrementSmall = 0.05f, incrementLarge = 0.1f, unit = "s", scene = UI_Scene.All, sigFigs = 2)]
-        private float ABSrate = 0.5f;
+        private readonly float ABSrate = 0.5f;
 
         [KSPEvent(guiName = "Turn on ABS", guiActive = true)]
         private void ToggleABS()
@@ -31,48 +32,45 @@ namespace SafeBrakes
                 Events["ToggleABS"].guiName = "Turn on ABS";
             }
         }
-
+        
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (vessel == FlightGlobals.ActiveVessel)
+            if (handBrake)
             {
-                if (handBrake)
-                {
-                    brakeTime += Time.deltaTime;
-                }
-
-                if ((GameSettings.BRAKES.GetKeyDown() && GameSettings.MODIFIER_KEY.GetKeyDown()) ||
-                   (GameSettings.BRAKES.GetKey() && GameSettings.MODIFIER_KEY.GetKeyDown()) ||
-                   (GameSettings.BRAKES.GetKeyDown() && GameSettings.MODIFIER_KEY.GetKey()))
-                {
-                    handBrake = !LastActionbrakes;
-                    brakeTime = 0;
-                }
-
-                if (handBrake && !vessel.ActionGroups[KSPActionGroup.Brakes] && brakeTime > 0.3)
-                {
-                    handBrake = false;
-                }
-
-                if ((vessel.ActionGroups[KSPActionGroup.Brakes] != ABSstate) && ABSenabled && !ABSstart && vessel.horizontalSrfSpeed >= 2)
-                {
-                    ABSstart = true;
-                }
-                else if ((vessel.ActionGroups[KSPActionGroup.Brakes] == ABSstate) || vessel.horizontalSrfSpeed < 2)
-                {
-                    ABSstart = false;
-                }
-
-                ABS();
-                ParkBrake();
+                brakeTime += Time.deltaTime;
             }
+
+            if ((GameSettings.BRAKES.GetKeyDown() && GameSettings.MODIFIER_KEY.GetKeyDown()) ||
+               (GameSettings.BRAKES.GetKey() && GameSettings.MODIFIER_KEY.GetKeyDown()) ||
+               (GameSettings.BRAKES.GetKeyDown() && GameSettings.MODIFIER_KEY.GetKey()))
+            {
+                handBrake = !LastActionbrakes;
+                brakeTime = 0;
+            }
+
+            if (handBrake && !vessel.ActionGroups[KSPActionGroup.Brakes] && brakeTime > 0.3)
+            {
+                handBrake = false;
+            }
+
+            if ((vessel.ActionGroups[KSPActionGroup.Brakes] != ABSstate) && ABSenabled && !ABSstart && vessel.horizontalSrfSpeed >= settings.Fetch<int>("ABS_MinSpd", 2))
+            {
+                ABSstart = true;
+            }
+            else if ((vessel.ActionGroups[KSPActionGroup.Brakes] == ABSstate) || vessel.horizontalSrfSpeed < settings.Fetch<int>("ABS_MinSpd", 2))
+            {
+                ABSstart = false;
+            }
+
+            ABS();
+            ParkBrake();
             LastActionbrakes = vessel.ActionGroups[KSPActionGroup.Brakes];
         }
 
         private void ABS()
         {
-            if (ABSenabled && ABSstart)
+            if (ABSenabled && ABSstart && (vessel.checkLanded() || vessel.checkSplashed()))
             {
                 ABStime += Time.deltaTime;
                 if (ABStime >= ABSrate)
