@@ -1,19 +1,24 @@
 {
     "NAME": "SafeBrakes",
-    "URL": "https://raw.githubusercontent.com/Astronants/SafeBrakes/master/SafeBrakes/SafeBrakes.version?token=AmzwCPC5H35MEuTe-eztcVZc-glsSwfzks5coeRlwA%3D%3D",
-    "DOWNLOAD": "https://spacedock.info/mod/2127/SafeBrakes",
-    "GITHUB" : {
-        "USERNAME": "Astronants",
-        "REPOSITORY": "Safebrakes"
-    },
-    "VERSION": {
+	"URL": "https://raw.githubusercontent.com/Astronants/SafeBrakes/master/SafeBrakes/SafeBrakes.version?token=AmzwCPC5H35MEuTe-eztcVZc-glsSwfzks5coeRlwA%3D%3D",
+	"DOWNLOAD": "https://spacedock.info/mod/2127/SafeBrakes",
+	"GITHUB" : {
+		"USERNAME": "Astronants",
+		"REPOSITORY": "Safebrakes"
+	},
+	"VERSION": {
         "MAJOR": 1,
         "MINOR": 1,
-        "PATCH": 0
+        "PATCH": 1
     },
     "KSP_VERSION": {
-	"MAJOR": 1,
+        "MAJOR": 1,
         "MINOR": 7,
-        "PATCH": 0
+        "PATCH": 3
+    }
+    "KSP_VERSION_MAX": {
+        "MAJOR": 1,
+        "MINOR": 7,
+        "PATCH": 99
     }
 }
