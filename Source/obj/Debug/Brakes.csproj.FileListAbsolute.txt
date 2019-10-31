@@ -1,4 +1,0 @@
-C:\Users\Nico\Desktop\KSP\0_MODS\Brakes\Brakes\Brakes\obj\Debug\Brakes.csprojAssemblyReference.cache
-C:\Users\Nico\Desktop\KSP\0_MODS\Brakes\Brakes\Brakes\obj\Debug\Brakes.csproj.CoreCompileInputs.cache
-C:\Users\Nico\Desktop\KSP\0_MODS\Brakes\Brakes\Brakes\bin\Debug\SafeBrakes.dll
-C:\Users\Nico\Desktop\KSP\0_MODS\Brakes\Brakes\Brakes\obj\Debug\SafeBrakes.dll
