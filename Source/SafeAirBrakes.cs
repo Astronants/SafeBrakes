@@ -2,25 +2,39 @@
 {
     public class SafeAirBrakes : PartModule
     {
-        bool antiHeatBrake = false;
-        Configs settings = new Configs();
+        private bool antiHeatBrakes, SAB_on;
 
         public override void OnUpdate()
         {
             base.OnUpdate();
-
-            if (antiHeatBrake != vessel.ActionGroups[KSPActionGroup.Brakes])
+            if (vessel != FlightGlobals.ActiveVessel) { return; }
+            if (Configs.current.sab_allow)
             {
-                if (part.skinTemperature / (part.maxTemp * 0.5) * 100 >= settings.Fetch<int>("SAB_HighTrigger", 80) && (vessel.ActionGroups[KSPActionGroup.Brakes] == true))
+                if (antiHeatBrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
                 {
-                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
-                    antiHeatBrake = true;
+                    if (part.skinTemperature / (part.maxTemp * 0.5f) * 100f >= Configs.current.sab_highT && (vessel.ActionGroups[KSPActionGroup.Brakes] == true))
+                    {
+                        vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
+                        antiHeatBrakes = true;
+                        Configs.SAB_active = true;
+                    }
+                    else if (part.skinTemperature / (part.maxTemp * 0.5f) * 100f <= Configs.current.sab_lowT && (vessel.ActionGroups[KSPActionGroup.Brakes] == false))
+                    {
+                        vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
+                        antiHeatBrakes = false;
+                        Configs.SAB_active = false;
+                    }
                 }
-                else if (part.skinTemperature / (part.maxTemp * 0.5) * 100 <= settings.Fetch<int>("SAB_LowTrigger", 50) && (vessel.ActionGroups[KSPActionGroup.Brakes] == false))
+                SAB_on = true;
+            }
+            else
+            {
+                if (SAB_on)
                 {
-                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
-                    antiHeatBrake = false;
+                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, !antiHeatBrakes);
                 }
+                Configs.SAB_active = false;
+                SAB_on = false;
             }
         }
     }

@@ -4,38 +4,42 @@ namespace SafeBrakes
 {
     public class SafeBrakes : PartModule
     {
-        Configs settings = new Configs();
-        bool LastActionbrakes;
-        bool handBrake = false;
-        bool ABSenabled = false;
-        float ABStime = 0;
-        float brakeTime = 0;
-        bool ABSstart = false;
-        bool ABSstate = false;
+        private bool LastActionBrakes, handBrake, ABSenabled, ABSstart, ABSbrakes;
+        private float ABStime = 0, brakeTime = 0;
 
-        [KSPField(isPersistant = true,guiActiveEditor = true, guiActive = true, guiName = "ABS rate", guiFormat = "0.00"),
-            UI_FloatEdit(minValue = 0.1f, maxValue =  1, incrementSlide = 0.01f, incrementSmall = 0.05f, incrementLarge = 0.1f, unit = "s", scene = UI_Scene.All, sigFigs = 2)]
+        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "ABS rate", guiFormat = "0.00"),
+            UI_FloatRange(minValue = 0.1f, maxValue = 1.0f, stepIncrement = 0.01f)]
         private readonly float ABSrate = 0.5f;
 
-        [KSPEvent(guiName = "Turn on ABS", guiActive = true)]
+        [KSPEvent(guiName = "Turn on ABS", guiActive = true, isPersistent = true)]
         private void ToggleABS()
         {
             if (ABSenabled == false)
             {
                 ABSenabled = true;
-                Events["ToggleABS"].guiName = "Turn off ABS";
                 ABStime = 0;
             }
             else
             {
                 ABSenabled = false;
-                Events["ToggleABS"].guiName = "Turn on ABS";
+                ABSstart = false;
+                ABSbrakes = false;
             }
         }
-        
+
         public override void OnUpdate()
         {
             base.OnUpdate();
+            if (vessel != FlightGlobals.ActiveVessel) { return; }
+            if (ABSenabled == false)
+            {
+                Events["ToggleABS"].guiName = "Turn on ABS";
+            }
+            else
+            {
+                Events["ToggleABS"].guiName = "Turn off ABS";
+            }
+
             if (handBrake)
             {
                 brakeTime += Time.deltaTime;
@@ -45,7 +49,7 @@ namespace SafeBrakes
                (GameSettings.BRAKES.GetKey() && GameSettings.MODIFIER_KEY.GetKeyDown()) ||
                (GameSettings.BRAKES.GetKeyDown() && GameSettings.MODIFIER_KEY.GetKey()))
             {
-                handBrake = !LastActionbrakes;
+                handBrake = !LastActionBrakes;
                 brakeTime = 0;
             }
 
@@ -54,35 +58,40 @@ namespace SafeBrakes
                 handBrake = false;
             }
 
-            if ((vessel.ActionGroups[KSPActionGroup.Brakes] != ABSstate) && ABSenabled && !ABSstart && vessel.horizontalSrfSpeed >= settings.Fetch<int>("ABS_MinSpd", 2))
+            if ((vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes) && ABSenabled && !ABSstart && vessel.horizontalSrfSpeed >= Configs.current.abs_minSpd)
             {
                 ABSstart = true;
             }
-            else if ((vessel.ActionGroups[KSPActionGroup.Brakes] == ABSstate) || vessel.horizontalSrfSpeed < settings.Fetch<int>("ABS_MinSpd", 2))
+            else if ((vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes) || vessel.horizontalSrfSpeed < Configs.current.abs_minSpd)
             {
                 ABSstart = false;
             }
 
+            LastActionBrakes = vessel.ActionGroups[KSPActionGroup.Brakes];
             ABS();
             ParkBrake();
-            LastActionbrakes = vessel.ActionGroups[KSPActionGroup.Brakes];
         }
 
         private void ABS()
         {
+            if (!ABSenabled || !ABSstart)
+            {
+                Configs.ABS_active = false;
+            }
             if (ABSenabled && ABSstart && (vessel.checkLanded() || vessel.checkSplashed()))
             {
+                Configs.ABS_active = true;
                 ABStime += Time.deltaTime;
                 if (ABStime >= ABSrate)
                 {
                     vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
                     ABStime = 0;
-                    ABSstate = true;
+                    ABSbrakes = true;
                 }
                 else
                 {
                     vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
-                    ABSstate = false;
+                    ABSbrakes = false;
                 }
             }
         }
