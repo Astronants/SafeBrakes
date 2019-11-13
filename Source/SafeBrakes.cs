@@ -7,12 +7,21 @@ namespace SafeBrakes
         private bool LastActionBrakes, handBrake, ABSenabled, ABSstart, ABSbrakes;
         private float ABStime = 0, brakeTime = 0;
 
-        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "ABS rate", guiFormat = "0.00"),
+        [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "ABS interval", guiFormat = "0.00"),
             UI_FloatRange(minValue = 0.1f, maxValue = 1.0f, stepIncrement = 0.01f)]
         private readonly float ABSrate = 0.5f;
 
         [KSPEvent(guiName = "Turn on ABS", guiActive = true, isPersistent = true)]
-        private void ToggleABS()
+        public void Event_ToggleABS()
+        {
+            ToggleABS();
+        }
+        [KSPAction("Toggle ABS")]
+        public void Action_ToggleABS(KSPActionParam param)
+        {
+            ToggleABS();
+        }
+        private  void ToggleABS()
         {
             if (ABSenabled == false)
             {
@@ -33,11 +42,11 @@ namespace SafeBrakes
             if (vessel != FlightGlobals.ActiveVessel) { return; }
             if (ABSenabled == false)
             {
-                Events["ToggleABS"].guiName = "Turn on ABS";
+                Events["Event_ToggleABS"].guiName = "Turn on ABS";
             }
             else
             {
-                Events["ToggleABS"].guiName = "Turn off ABS";
+                Events["Event_ToggleABS"].guiName = "Turn off ABS";
             }
 
             if (handBrake)

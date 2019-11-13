@@ -7,9 +7,7 @@ namespace SafeBrakes
 {
     class Preset
     {
-        public string fileName;
-        public string oldFileName;
-        public string name;
+        public string fileName, oldFileName, name;
         public float abs_minSpd = 2.0f;
         public bool sab_allow = true;
         public float sab_highT = 80.0f;

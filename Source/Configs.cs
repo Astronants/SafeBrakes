@@ -31,12 +31,6 @@ namespace SafeBrakes
             if (firstRun)
             {
                 Load_Presets();
-                if (allConfigs.Count == 0)
-                {
-                    Preset cfg = new Preset("Default");
-                    cfg.Save(presets_dir);
-                    allConfigs.Add(cfg);
-                }
                 Load_PluginCfg();
                 firstRun = false;
             }
@@ -144,8 +138,14 @@ namespace SafeBrakes
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"SafeBrakes => {Path.GetFileName(file)}: an error has occured while loading the preset.", e);
+                    Logger.Error($"{Path.GetFileName(file)}: an error has occured while loading the preset.", e);
                 }
+            }
+            if (allConfigs.Count == 0)
+            {
+                Preset cfg = new Preset("Default");
+                cfg.Save(presets_dir);
+                allConfigs.Add(cfg);
             }
         }
 

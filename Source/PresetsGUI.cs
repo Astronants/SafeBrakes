@@ -82,10 +82,10 @@ namespace SafeBrakes
                 else
                 {
                     Configs.current.name = show_name;
-                    Configs.current.abs_minSpd = float.Parse(show_absMin);
+                    try { Configs.current.abs_minSpd = float.Parse(show_absMin); } catch { }
                     Configs.current.sab_allow = show_sabAllow;
-                    Configs.current.sab_highT = float.Parse(show_sabHigh);
-                    Configs.current.sab_lowT = float.Parse(show_sabLow);
+                    try { Configs.current.sab_highT = float.Parse(show_sabHigh); } catch { }
+                    try { Configs.current.sab_lowT = float.Parse(show_sabLow); } catch { }
                     if (Configs.current.Save(Configs.presets_dir))
                     {
                         Logger.Log("Config saved.");

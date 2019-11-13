@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfirmGUI.cs" />
+    <Compile Include="InstallCheck.cs" />
     <Compile Include="SettingsGUI.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Preset.cs" />
