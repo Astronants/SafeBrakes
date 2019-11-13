@@ -1,31 +1,39 @@
-SafeBrakes v1.1.3
-for KSP 1.8.1
+SafeBrakes v1.1.4
+for KSP 1.8.x
 by Astronants
 
 Because we don't want to see our sstos explode on the landing.
 
-==DESCRIPTION==
-You can activate the brakes with MODkey + BRAKESkey (alt + b by default on Windows).
+==IMPORTANT==
+Here's a poll to vote on how you would prefer to toggle the brakes from the keyboard.
+https://www.strawpoll.me/18896153
+
+==FEATURES==
+You can activate the brakes with MODkey + BRAKESkey (alt+b by default on Windows).
 If on, the antilock system (ABS) temporarily deactivates the brakes to avoid drifting and crashing onto the runway during landing.
-The anti-overheat system (SAB) will temporarily deactivates the brakes if the airbrakes are overheating.
+The anti-overheat system (SAB) will temporarily deactivates the brakes when the aibrakes are overheating.
 
 ==INSTALLATION==
 Extract the mod inside your GameData folder.
 
 ==SUPPORT==
-If you find bugs or have suggestion, let me know on Github.
+If you find bugs or have suggestions, let me know on Github.
 
 ==CHANGELOG==
-v1.1.3
+1.1.4
+- community suggestions: renamed "ABS rate" to "ABS interval", added ABS action group
+- added installation checking
+- bug fixes
+1.1.3
 - recompiled for KSP 1.8.x
 - added GUI
-v1.1.2
+1.1.2
 - Fixed version file syntax
-v1.1.1
+1.1.1
 - Added settings file.
-v1.1
+1.1.0
 - The antilock system now only works when landing or splashed down.
 - Added an anti-overheat system to the airbrakes: it deactivates the brakes to avoid overheating and reactivates them when they are cooled.
 - moved the MiniAVC.dll so that it can work.
-v1.0
+1.0.0
 - Initial release
