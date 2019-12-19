@@ -1,12 +1,8 @@
-SafeBrakes v1.1.4
+SafeBrakes 1.1.5
 for KSP 1.8.x
 by Astronants
 
 Because we don't want to see our sstos explode on the landing.
-
-==IMPORTANT==
-Here's a poll to vote on how you would prefer to toggle the brakes from the keyboard.
-https://www.strawpoll.me/18896153
 
 ==FEATURES==
 You can activate the brakes with MODkey + BRAKESkey (alt+b by default on Windows).
@@ -20,6 +16,10 @@ Extract the mod inside your GameData folder.
 If you find bugs or have suggestions, let me know on Github.
 
 ==CHANGELOG==
+1.1.5
+- poll results: toggle the brakes with modkey + brakes [63%]
+- updated InstallCheck and ModuleManager
+- various bug fixes and improvements
 1.1.4
 - community suggestions: renamed "ABS rate" to "ABS interval", added ABS action group
 - added installation checking
