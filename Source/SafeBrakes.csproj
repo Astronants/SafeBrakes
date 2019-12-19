@@ -18,8 +18,8 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>Output\Plugins\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>Output\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,7 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -47,49 +47,50 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\KerbalSpaceProgram\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfirmGUI.cs" />
+    <Compile Include="AppLauncherButton.cs" />
+    <Compile Include="GUI\Confirm.cs" />
     <Compile Include="InstallCheck.cs" />
-    <Compile Include="SettingsGUI.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Preset.cs" />
-    <Compile Include="PresetsGUI.cs" />
+    <Compile Include="GUI\Main.cs" />
     <Compile Include="SafeAirBrakes.cs" />
-    <Compile Include="Configs.cs" />
+    <Compile Include="PresetsHandler.cs" />
     <Compile Include="SafeBrakes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
