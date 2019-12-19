@@ -5,7 +5,8 @@ namespace SafeBrakes
 {
     class Logger : MonoBehaviour
     {
-        public static readonly string logPrefix = "SafeBrakes =>";
+        public const string modName = "SafeBrakes";
+        public const string logPrefix = "[SafeBrakes]";
 
         public static void Log(string message)
         {
