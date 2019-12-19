@@ -4,8 +4,10 @@ namespace SafeBrakes
 {
     public class SafeBrakes : PartModule
     {
-        private bool LastActionBrakes, handBrake, ABSenabled, ABSstart, ABSbrakes;
-        private float ABStime = 0, brakeTime = 0;
+        private bool lastActionBrakes, toggleBrakes;
+        private float brakeTime = 0;
+        private bool ABSenabled, ABSstart, ABSbrakes;
+        private float ABStime = 0;
 
         [KSPField(isPersistant = true, guiActiveEditor = true, guiActive = true, guiName = "ABS interval", guiFormat = "0.00"),
             UI_FloatRange(minValue = 0.1f, maxValue = 1.0f, stepIncrement = 0.01f)]
@@ -39,7 +41,8 @@ namespace SafeBrakes
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (vessel != FlightGlobals.ActiveVessel) { return; }
+            if (vessel == null || FlightGlobals.ActiveVessel == null) return;
+
             if (ABSenabled == false)
             {
                 Events["Event_ToggleABS"].guiName = "Turn on ABS";
@@ -49,7 +52,8 @@ namespace SafeBrakes
                 Events["Event_ToggleABS"].guiName = "Turn off ABS";
             }
 
-            if (handBrake)
+            #region toggling brakes
+            if (toggleBrakes)
             {
                 brakeTime += Time.deltaTime;
             }
@@ -58,60 +62,73 @@ namespace SafeBrakes
                (GameSettings.BRAKES.GetKey() && GameSettings.MODIFIER_KEY.GetKeyDown()) ||
                (GameSettings.BRAKES.GetKeyDown() && GameSettings.MODIFIER_KEY.GetKey()))
             {
-                handBrake = !LastActionBrakes;
+                toggleBrakes = !lastActionBrakes;
                 brakeTime = 0;
             }
 
-            if (handBrake && !vessel.ActionGroups[KSPActionGroup.Brakes] && brakeTime > 0.3)
+            if (toggleBrakes && !vessel.ActionGroups[KSPActionGroup.Brakes] && brakeTime > 0.3)
             {
-                handBrake = false;
+                toggleBrakes = false;
             }
+            #endregion
 
-            if ((vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes) && ABSenabled && !ABSstart && vessel.horizontalSrfSpeed >= Configs.current.abs_minSpd)
+            #region antilock system
+            if (PresetsHandler.current != null)
             {
-                ABSstart = true;
+                if (ABSenabled)
+                {
+                    if (!ABSstart && vessel.horizontalSrfSpeed >= PresetsHandler.current.abs_minSpd && vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes)
+                    {
+                        ABSstart = true;
+                    }
+                    else if (vessel.horizontalSrfSpeed < PresetsHandler.current.abs_minSpd || vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes)
+                    {
+                        ABSstart = false;
+                    }
+                }
             }
-            else if ((vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes) || vessel.horizontalSrfSpeed < Configs.current.abs_minSpd)
-            {
-                ABSstart = false;
-            }
+            #endregion
 
-            LastActionBrakes = vessel.ActionGroups[KSPActionGroup.Brakes];
             ABS();
-            ParkBrake();
-        }
+            ToggleBrakes();
 
+            lastActionBrakes = vessel.ActionGroups[KSPActionGroup.Brakes];
+        }
+        
         private void ABS()
         {
-            if (!ABSenabled || !ABSstart)
+            if (ABSenabled && ABSstart)
             {
-                Configs.ABS_active = false;
+                if (vessel.LandedOrSplashed)
+                {
+                    AppLauncherButton.ABS_active(true);
+
+                    ABStime += Time.deltaTime;
+                    if (ABStime >= ABSrate)
+                    {
+                        vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
+                        ABStime = 0;
+                        ABSbrakes = true;
+                    }
+                    else
+                    {
+                        vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
+                        ABSbrakes = false;
+                    }
+                }
             }
-            if (ABSenabled && ABSstart && (vessel.checkLanded() || vessel.checkSplashed()))
+            else
             {
-                Configs.ABS_active = true;
-                ABStime += Time.deltaTime;
-                if (ABStime >= ABSrate)
-                {
-                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
-                    ABStime = 0;
-                    ABSbrakes = true;
-                }
-                else
-                {
-                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
-                    ABSbrakes = false;
-                }
+                AppLauncherButton.ABS_active(false);
             }
         }
 
-        private void ParkBrake()
+        private void ToggleBrakes()
         {
-            if (handBrake && !ABSstart)
+            if (toggleBrakes && !ABSstart)
             {
-                vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, handBrake);
+                vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, toggleBrakes);
             }
         }
-
     }
 }

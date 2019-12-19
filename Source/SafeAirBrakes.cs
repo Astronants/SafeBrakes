@@ -1,40 +1,68 @@
-﻿namespace SafeBrakes
+﻿using System.Linq;
+
+namespace SafeBrakes
 {
     public class SafeAirBrakes : PartModule
     {
-        private bool antiHeatBrakes, SAB_on;
+        private bool SABenabled, SABbrakes, SABstart;
+        private ModuleAeroSurface module;
+
+        public override void OnAwake()
+        {
+            base.OnAwake();
+            SABstart = false;
+        }
 
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (vessel != FlightGlobals.ActiveVessel) { return; }
-            if (Configs.current.sab_allow)
+            if (vessel == null || PresetsHandler.current == null) return;
+
+            SABenabled = PresetsHandler.current.allow_sab;
+
+            if (SABenabled && SABbrakes == vessel.ActionGroups[KSPActionGroup.Brakes])
             {
-                if (antiHeatBrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
+                SABenabled = false;
+            }
+
+            module = part.Modules.GetModules<ModuleAeroSurface>().First();
+            float temperature = (float)part.skinTemperature / module.uncasedTemp * 100f;
+
+            if (SABenabled)
+            {
+                if (temperature >= PresetsHandler.current.sab_highT && SABbrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
                 {
-                    if (part.skinTemperature / (part.maxTemp * 0.5f) * 100f >= Configs.current.sab_highT && (vessel.ActionGroups[KSPActionGroup.Brakes] == true))
-                    {
-                        vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
-                        antiHeatBrakes = true;
-                        Configs.SAB_active = true;
-                    }
-                    else if (part.skinTemperature / (part.maxTemp * 0.5f) * 100f <= Configs.current.sab_lowT && (vessel.ActionGroups[KSPActionGroup.Brakes] == false))
-                    {
-                        vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
-                        antiHeatBrakes = false;
-                        Configs.SAB_active = false;
-                    }
+                    SABstart = true;
                 }
-                SAB_on = true;
+                else if (temperature < PresetsHandler.current.sab_lowT)
+                {
+                    SABstart = false;
+                }
+            }
+
+            SAB();
+        }
+
+        private void SAB()
+        {
+            if (SABenabled)
+            {
+                if (SABstart)
+                {
+                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
+                    SABbrakes = true;
+                    AppLauncherButton.SAB_active(true);
+                }
+                else
+                {
+                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
+                    AppLauncherButton.SAB_active(false);
+                    SABbrakes = false;
+                }
             }
             else
             {
-                if (SAB_on)
-                {
-                    vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, !antiHeatBrakes);
-                }
-                Configs.SAB_active = false;
-                SAB_on = false;
+                AppLauncherButton.SAB_active(false);
             }
         }
     }
