@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Reflection;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,28 +9,24 @@ namespace SafeBrakes
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class PresetsHandler : MonoBehaviour
     {
-        private static bool firstRun = true;
+        private static bool FirstRun = true;
+        public static PresetsHandler Instance { get; private set; }
 
-        public static readonly string assembly_dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location).Replace("\\", "/");
-        public static readonly string presets_dir = assembly_dir.Replace("Plugins", "Settings/");
         public const string defaultPreset = "Default.cfg";
 
-        public static Preset current;
-        public static List<Preset> allConfigs;
-        
-        public static Main mainGUI;
+        public Preset current;
+        public List<Preset> allConfigs;
+        public UI.Main mainGUI;
 
-        public void Awake()
+        public void Start()
         {
-            if (firstRun)
+            Instance = this;
+            LoadPresets();
+            if (FirstRun)
             {
-                Load_Presets();
                 Settings.Instantiate();
-                firstRun = false;
-            }
-            if (mainGUI == null)
-            {
-                mainGUI = this.gameObject.AddComponent<Main>();
+                mainGUI = this.gameObject.AddComponent<UI.Main>();
+                FirstRun = false;
             }
         }
 
@@ -39,12 +34,13 @@ namespace SafeBrakes
         {
             Destroy(mainGUI);
             mainGUI = null;
+            Instance = null;
         }
-        
-        public static void Load_Presets()
+
+        public void LoadPresets()
         {
             allConfigs = new List<Preset>();
-            foreach (var file in Directory.GetFiles(presets_dir, "*.cfg"))
+            foreach (var file in Directory.GetFiles(DirUtils.PresetsDir, "*.cfg"))
             {
                 try
                 {
@@ -60,16 +56,42 @@ namespace SafeBrakes
                 }
                 catch (Exception e)
                 {
-                    Logger.Error($"{Path.GetFileName(file)}: an error has occured while loading the preset.", e);
+                    Logger.Error($"{Path.GetFileName(file)}: an error has occured while loading the config.", e);
                 }
             }
             if (!allConfigs.Where(preset => preset.FileName == defaultPreset).Any())
             {
                 Preset cfg = new Preset("Default");
-                cfg.Save(presets_dir);
+                cfg.Save(DirUtils.PresetsDir);
                 allConfigs.Insert(0, cfg);
             }
         }
-        
+
+        public bool SavePreset()
+        {
+            return current.Save(DirUtils.PresetsDir);
+        }
+
+        internal void DeletePreset()
+        {
+            try
+            {
+                int i = allConfigs.IndexOf(current);
+
+                File.Delete(Path.Combine(DirUtils.PresetsDir, current.FileName));
+                allConfigs.Remove(current);
+
+                current = i < allConfigs.Count ? allConfigs[i] : allConfigs[i - 1];
+                Settings.Instance.Save();
+
+                UI.Main.Instance.Page.Update();
+                ScreenMessages.PostScreenMessage($"[{Logger.modName}]: Config deleted.", 5, ScreenMessageStyle.UPPER_CENTER);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("An error has occured while deleting the config.", ex);
+                ScreenMessages.PostScreenMessage($"[{Logger.modName}]: An error has occured while deleting the config.", 5, ScreenMessageStyle.UPPER_CENTER);
+            }
+        }
     }
 }
