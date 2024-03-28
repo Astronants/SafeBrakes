@@ -45,7 +45,7 @@ namespace SafeBrakes
                 // prevent other configs with same name from being overwritten
                 string newName = this.name;
                 int n = 2;
-                while (PresetsHandler.Instance.allConfigs.Exists(cfg => cfg != this && cfg.name == newName))
+                while (Settings.Instance.Presets.All.Exists(cfg => cfg != this && cfg.name == newName))
                 {
                     newName = $"{this.name} {n++}";
                 }

@@ -14,7 +14,7 @@ namespace SafeBrakes.UI
                 useKSPskin = GUILayout.Toggle(useKSPskin, "use KSP Skin");
                 if (GUILayout.Button("Reload Presets"))
                 {
-                    PresetsHandler.Instance.LoadPresets();
+                    Settings.Instance.Presets.LoadPresets();
                 }
             }
             GUILayout.EndScrollView();
@@ -31,15 +31,7 @@ namespace SafeBrakes.UI
         public void Save()
         {
             Settings.Instance.useKSPskin = this.useKSPskin;
-
-            if (Settings.Instance.Save())
-            {
-                ScreenMessages.PostScreenMessage($"[{Logger.modName}]: Settings saved.", 5, ScreenMessageStyle.UPPER_CENTER);
-            }
-            else
-            {
-                ScreenMessages.PostScreenMessage($"[{Logger.modName}]: An error has occured while saving the settings.", 5, ScreenMessageStyle.UPPER_CENTER, Color.yellow);
-            }
+            Settings.Instance.Save();
         }
     }
 }

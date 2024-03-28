@@ -1,58 +1,48 @@
 ﻿using System;
-using System.Linq;
 using UnityEngine;
 
 namespace SafeBrakes
 {
-    class Settings
+    [KSPAddon(KSPAddon.Startup.Flight, true)]
+    class Settings : MonoBehaviour
     {
-        private static Settings instance;
-        public static Settings Instance => instance ?? (instance = new Settings());
+        public static Settings Instance { get; private set; }
 
         private readonly string settingsFile = UrlDir.PathCombine(DirUtils.ModDir, "SafeBrakes.cfg");
-
-        public static void Instantiate()
-        {
-            instance = new Settings();
-        }
-
+        private ConfigNode node;
         public bool useKSPskin = true;
 
-        public Settings()
+        public readonly PresetsHandler Presets = new PresetsHandler();
+
+        public void Start()
         {
-            ConfigNode pluginCfg = ConfigNode.Load(settingsFile);
-            try
+            Presets.LoadPresets();
+            node = ConfigNode.Load(settingsFile);
+            if (node.HasValues("SettingsFile", "KSPskin"))
             {
-                PresetsHandler.Instance.current = PresetsHandler.Instance.allConfigs.Where(cfg => cfg.FileName == pluginCfg.GetValue("SettingsFile")).First();
+                Presets.current = Presets.FirstOrDefault(node.GetValue("SettingsFile"));
+                useKSPskin = bool.Parse(node.GetValue("KSPskin"));
             }
-            catch
-            {
-                PresetsHandler.Instance.current = PresetsHandler.Instance.allConfigs.Where(cfg => cfg.FileName == PresetsHandler.defaultPreset).First();
-            }
+            Instance = this;
+        }
 
-            try { useKSPskin = bool.Parse(pluginCfg.GetValue("KSPskin")); } catch { }
-
-            Vector2 windowSize = UI.Main.DefaultskinSize;
-            if (useKSPskin) windowSize = UI.Main.KSPskinSize;
-            try
-            {
-                UI.Main.windowRect.position = new Vector2(Mathf.Clamp(float.Parse(pluginCfg.GetValue("X")), 0, Screen.width - windowSize.x), Mathf.Clamp(float.Parse(pluginCfg.GetValue("Y")), 0, Screen.height - windowSize.y));
-            }
-            catch
-            {
-                UI.Main.windowRect.position = new Vector2((Screen.width - windowSize.x) / 2, (Screen.height - windowSize.y) / 2);
-            }
+        public void SetWindowPosition(ref Rect rect)
+        {
+            if (!node.HasValues("X", "Y")) return;
+            float x = Mathf.Clamp(int.Parse(node.GetValue("X")), 0, Screen.width - UI.MainWindow.windowRect.width);
+            float y = Mathf.Clamp(int.Parse(node.GetValue("Y")), 0, Screen.height - UI.MainWindow.windowRect.height);
+            rect.position = new Vector2(x, y);
         }
 
         public bool Save()
         {
             try
             {
-                ConfigNode cfg = new ConfigNode();
-                cfg.AddValue("SettingsFile", PresetsHandler.Instance.current.FileName);
+                ConfigNode cfg = new ConfigNode("SafeBrakesSettings");
+                cfg.AddValue("SettingsFile", Settings.Instance.Presets.current.FileName);
                 cfg.AddValue("KSPskin", useKSPskin);
-                cfg.AddValue("X", UI.Main.windowRect.position.x);
-                cfg.AddValue("Y", UI.Main.windowRect.position.y);
+                cfg.AddValue("X", UI.MainWindow.windowRect.x);
+                cfg.AddValue("Y", UI.MainWindow.windowRect.y);
                 cfg.Save(settingsFile);
                 return true;
             }

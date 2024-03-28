@@ -1,90 +1,75 @@
 ﻿using System;
 using System.IO;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using SafeBrakes.UI;
 
 namespace SafeBrakes
 {
-    [KSPAddon(KSPAddon.Startup.Flight, false)]
-    class PresetsHandler : MonoBehaviour
+    internal class PresetsHandler
     {
-        private static bool FirstRun = true;
-        public static PresetsHandler Instance { get; private set; }
+        internal const string defaultPreset = "Default.cfg";
 
-        public const string defaultPreset = "Default.cfg";
+        internal Preset current;
+        internal readonly List<Preset> All = new List<Preset>();
 
-        public Preset current;
-        public List<Preset> allConfigs;
-        public UI.Main mainGUI;
-
-        public void Start()
+        internal void LoadPresets()
         {
-            Instance = this;
-            LoadPresets();
-            if (FirstRun)
-            {
-                Settings.Instantiate();
-                mainGUI = this.gameObject.AddComponent<UI.Main>();
-                FirstRun = false;
-            }
-        }
-
-        public void OnDestroy()
-        {
-            Destroy(mainGUI);
-            mainGUI = null;
-            Instance = null;
-        }
-
-        public void LoadPresets()
-        {
-            allConfigs = new List<Preset>();
+            All.Clear();
             foreach (var file in Directory.GetFiles(DirUtils.PresetsDir, "*.cfg"))
             {
                 try
                 {
                     Preset cfg = Preset.Load(file);
-                    if (cfg.FileName == defaultPreset)
-                    {
-                        allConfigs.Insert(0, cfg);
-                    }
-                    else
-                    {
-                        allConfigs.Add(cfg);
-                    }
+                    if (cfg.FileName == defaultPreset) All.Insert(0, cfg);
+                    else All.Add(cfg);
                 }
                 catch (Exception e)
                 {
                     Logger.Error($"{Path.GetFileName(file)}: an error has occured while loading the config.", e);
                 }
             }
-            if (!allConfigs.Where(preset => preset.FileName == defaultPreset).Any())
-            {
-                Preset cfg = new Preset("Default");
-                cfg.Save(DirUtils.PresetsDir);
-                allConfigs.Insert(0, cfg);
-            }
+
+            if (All.Count == 0) CreateDefault();
         }
 
-        public bool SavePreset()
+        private Preset CreateDefault()
+        {
+            Preset cfg = new Preset("Default");
+            All.Add(cfg);
+            cfg.Save(DirUtils.PresetsDir);
+            return cfg;
+        }
+
+        internal Preset FirstOrDefault(string name)
+        {
+            Preset cfg = All.FirstOrDefault(e => e.FileName == name);
+            if (cfg == default(Preset))
+            {
+                cfg = All.FirstOrDefault(e => e.FileName == defaultPreset);
+                if (cfg == default(Preset)) cfg = CreateDefault();
+            }
+            return cfg;
+        }
+
+        internal bool Save()
         {
             return current.Save(DirUtils.PresetsDir);
         }
 
-        internal void DeletePreset()
+        internal void Delete()
         {
             try
             {
-                int i = allConfigs.IndexOf(current);
+                int i = All.IndexOf(current);
 
                 File.Delete(Path.Combine(DirUtils.PresetsDir, current.FileName));
-                allConfigs.Remove(current);
+                All.Remove(current);
 
-                current = i < allConfigs.Count ? allConfigs[i] : allConfigs[i - 1];
+                current = i < All.Count ? All[i] : All[i - 1];
                 Settings.Instance.Save();
 
-                UI.Main.Instance.Page.Update();
+                AppLauncherButton.Instance.Window.Page.Update();
                 ScreenMessages.PostScreenMessage($"[{Logger.modName}]: Config deleted.", 5, ScreenMessageStyle.UPPER_CENTER);
             }
             catch (Exception ex)

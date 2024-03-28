@@ -11,7 +11,7 @@ namespace SafeBrakes.UI
         internal static Texture2D ABS    { get; private set; }
         internal static Texture2D SAB    { get; private set; }
 
-        internal void Start() // Fetch textures from the game's database to use as icons in the applauncher
+        internal void Start() // Fetch textures from the game's database to be used as icons by the applauncherbutton
         {
             Normal = GetDataBaseTexture("appIcon_N");
             Active = GetDataBaseTexture("appIcon_A");
@@ -31,6 +31,8 @@ namespace SafeBrakes.UI
     {
         private static AppLauncherButton instance;
         public static AppLauncherButton Instance => instance;
+
+        internal MainWindow Window { get; private set; }
 
         private enum IconStyle
         {
@@ -52,6 +54,8 @@ namespace SafeBrakes.UI
 
         public void OnDestroy()
         {
+            if (Window != null) Destroy(Window);
+            Window = null;
             instance = null;
             GameEvents.onGUIApplicationLauncherReady.Remove(this.CreateAppButton);
             GameEvents.onGUIApplicationLauncherUnreadifying.Remove(this.DestroyAppButton);
@@ -94,12 +98,14 @@ namespace SafeBrakes.UI
 
         private void OnButtonTrue()
         {
-            PresetsHandler.Instance.mainGUI.window_enabled = true;
+            if (Window == null) Window = gameObject.AddComponent<UI.MainWindow>();
+            Settings.Instance.Presets.LoadPresets();
+            Window.enabled = true;
         }
 
         private void OnButtonFalse()
         {
-            PresetsHandler.Instance.mainGUI.window_enabled = false;
+            Window.enabled = false;
             Settings.Instance.Save();
         }
 

@@ -82,7 +82,7 @@
     <Compile Include="UI\PresetPage.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Preset.cs" />
-    <Compile Include="UI\Main.cs" />
+    <Compile Include="UI\MainWindow.cs" />
     <Compile Include="PartModules\SafeAirBrakes.cs" />
     <Compile Include="PresetsHandler.cs" />
     <Compile Include="PartModules\SafeBrakes.cs" />

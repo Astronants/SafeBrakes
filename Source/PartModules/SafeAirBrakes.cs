@@ -16,9 +16,9 @@ namespace SafeBrakes
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (vessel == null || PresetsHandler.Instance.current == null) return;
+            if (vessel == null || Settings.Instance.Presets.current == null) return;
 
-            SABenabled = PresetsHandler.Instance.current.allow_sab;
+            SABenabled = Settings.Instance.Presets.current.allow_sab;
 
             if (SABenabled && SABbrakes == vessel.ActionGroups[KSPActionGroup.Brakes])
             {
@@ -30,11 +30,11 @@ namespace SafeBrakes
 
             if (SABenabled)
             {
-                if (temperature >= PresetsHandler.Instance.current.sab_highT && SABbrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
+                if (temperature >= Settings.Instance.Presets.current.sab_highT && SABbrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
                 {
                     SABstart = true;
                 }
-                else if (temperature < PresetsHandler.Instance.current.sab_lowT)
+                else if (temperature < Settings.Instance.Presets.current.sab_lowT)
                 {
                     SABstart = false;
                 }

@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SafeBrakes.UI
 {
@@ -15,7 +14,7 @@ namespace SafeBrakes.UI
         }
     }
 
-    class Main : MonoBehaviour
+    class MainWindow : MonoBehaviour
     {
         public IPage Page = new PresetPage();
 
@@ -23,18 +22,17 @@ namespace SafeBrakes.UI
         private Vector2 presetsListScroll;
 
         private bool gamepaused;
-        public bool window_enabled = false;
-
-        public static readonly Vector2 KSPskinSize = new Vector2(384, 254);
-        public static readonly Vector2 DefaultskinSize = new Vector2(390, 238);
-
-        public static Main Instance => PresetsHandler.Instance.mainGUI;
 
         public void Awake()
         {
+            enabled = false;
             GameEvents.onGamePause.Add(this.OnGamePause);
             GameEvents.onGameUnpause.Add(this.OnGameUnpause);
             Page.Update();
+            float x = Mathf.Clamp(Mouse.screenPos.x - 400, 0, Screen.width - UI.MainWindow.windowRect.width);
+            float y = Mathf.Clamp(Mouse.screenPos.y - 50, 0, Screen.height - UI.MainWindow.windowRect.height);
+            windowRect = new Rect(x, y, 0, 0);
+            Settings.Instance.SetWindowPosition(ref windowRect);
         }
 
         public void OnDestroy()
@@ -45,7 +43,7 @@ namespace SafeBrakes.UI
 
         public void OnGUI()
         {
-            if (!window_enabled || gamepaused) return;
+            if (!enabled || gamepaused) return;
             if (Settings.Instance.useKSPskin) GUI.skin = HighLogic.Skin;
 
             Styles.LoadStyles();
@@ -78,15 +76,15 @@ namespace SafeBrakes.UI
                         string newName = "New config";
                         Preset newcfg = new Preset(newName);
                         newcfg.Save(DirUtils.PresetsDir);
-                        PresetsHandler.Instance.allConfigs.Add(newcfg);
-                        PresetsHandler.Instance.current = PresetsHandler.Instance.allConfigs[PresetsHandler.Instance.allConfigs.Count - 1];
+                        Settings.Instance.Presets.All.Add(newcfg);
+                        Settings.Instance.Presets.current = Settings.Instance.Presets.All[Settings.Instance.Presets.All.Count - 1];
                         Settings.Instance.Save();
                         SetPage(new PresetPage());
                     }
                     presetsListScroll = GUILayout.BeginScrollView(presetsListScroll);
-                    foreach (var config in PresetsHandler.Instance.allConfigs)
+                    foreach (var config in Settings.Instance.Presets.All)
                     {
-                        if (PresetsHandler.Instance.current == config)
+                        if (Settings.Instance.Presets.current == config)
                         {
                             GUILayout.Label(config.name, Styles.selected_button);
                         }
@@ -94,7 +92,7 @@ namespace SafeBrakes.UI
                         {
                             if (GUILayout.Button(config.name))
                             {
-                                PresetsHandler.Instance.current = config;
+                                Settings.Instance.Presets.current = config;
                                 Settings.Instance.Save();
                                 SetPage(new PresetPage());
                             }

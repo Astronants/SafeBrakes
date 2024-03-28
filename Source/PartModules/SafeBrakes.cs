@@ -73,15 +73,15 @@ namespace SafeBrakes
             #endregion
 
             #region antilock system
-            if (PresetsHandler.Instance.current != null)
+            if (Settings.Instance.Presets.current != null)
             {
                 if (ABSenabled)
                 {
-                    if (!ABSstart && vessel.horizontalSrfSpeed >= PresetsHandler.Instance.current.abs_minSpd && vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes)
+                    if (!ABSstart && vessel.horizontalSrfSpeed >= Settings.Instance.Presets.current.abs_minSpd && vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes)
                     {
                         ABSstart = true;
                     }
-                    else if (vessel.horizontalSrfSpeed < PresetsHandler.Instance.current.abs_minSpd || vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes)
+                    else if (vessel.horizontalSrfSpeed < Settings.Instance.Presets.current.abs_minSpd || vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes)
                     {
                         ABSstart = false;
                     }
@@ -94,7 +94,7 @@ namespace SafeBrakes
 
             lastActionBrakes = vessel.ActionGroups[KSPActionGroup.Brakes];
         }
-        
+
         private void ABS()
         {
             if (ABSenabled && ABSstart)
