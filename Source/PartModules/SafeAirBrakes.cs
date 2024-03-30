@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using SafeBrakes.UI;
+using System.Linq;
 
 namespace SafeBrakes
 {
@@ -16,9 +17,9 @@ namespace SafeBrakes
         public override void OnUpdate()
         {
             base.OnUpdate();
-            if (vessel == null || Settings.Instance.Presets.current == null) return;
+            if (vessel == null || App.Instance.presets.Selected == null) return;
 
-            SABenabled = Settings.Instance.Presets.current.allow_sab;
+            SABenabled = App.Instance.presets.Selected.allow_sab;
 
             if (SABenabled && SABbrakes == vessel.ActionGroups[KSPActionGroup.Brakes])
             {
@@ -30,11 +31,11 @@ namespace SafeBrakes
 
             if (SABenabled)
             {
-                if (temperature >= Settings.Instance.Presets.current.sab_highT && SABbrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
+                if (temperature >= App.Instance.presets.Selected.sab_highT && SABbrakes != vessel.ActionGroups[KSPActionGroup.Brakes])
                 {
                     SABstart = true;
                 }
-                else if (temperature < Settings.Instance.Presets.current.sab_lowT)
+                else if (temperature < App.Instance.presets.Selected.sab_lowT)
                 {
                     SABstart = false;
                 }
@@ -51,18 +52,18 @@ namespace SafeBrakes
                 {
                     vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, false);
                     SABbrakes = true;
-                    UI.AppLauncherButton.Instance.SAB_active(true);
+                    UI.App.Instance.SAB_active(true);
                 }
                 else
                 {
                     vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);
-                    UI.AppLauncherButton.Instance.SAB_active(false);
+                    UI.App.Instance.SAB_active(false);
                     SABbrakes = false;
                 }
             }
             else
             {
-                UI.AppLauncherButton.Instance.SAB_active(false);
+                UI.App.Instance.SAB_active(false);
             }
         }
     }

@@ -3,27 +3,23 @@ using UnityEngine;
 
 namespace SafeBrakes
 {
-    [KSPAddon(KSPAddon.Startup.Flight, true)]
     class Settings : MonoBehaviour
     {
-        public static Settings Instance { get; private set; }
-
         private readonly string settingsFile = UrlDir.PathCombine(DirUtils.ModDir, "SafeBrakes.cfg");
         private ConfigNode node;
         public bool useKSPskin = true;
 
-        public readonly PresetsHandler Presets = new PresetsHandler();
-
-        public void Start()
+        public Settings()
         {
-            Presets.LoadPresets();
             node = ConfigNode.Load(settingsFile);
-            if (node.HasValues("SettingsFile", "KSPskin"))
-            {
-                Presets.current = Presets.FirstOrDefault(node.GetValue("SettingsFile"));
-                useKSPskin = bool.Parse(node.GetValue("KSPskin"));
-            }
-            Instance = this;
+            if (!node.HasValue("KSPskin")) return;
+            useKSPskin = bool.Parse(node.GetValue("KSPskin"));
+        }
+
+        public void SetSelectedPreset(ref PresetCollection collection)
+        {
+            string file = node.GetValue("SettingsFile");
+            collection.Selected = collection.FirstOrDefault(file);
         }
 
         public void SetWindowPosition(ref Rect rect)
@@ -39,11 +35,12 @@ namespace SafeBrakes
             try
             {
                 ConfigNode cfg = new ConfigNode("SafeBrakesSettings");
-                cfg.AddValue("SettingsFile", Settings.Instance.Presets.current.FileName);
+                cfg.AddValue("SettingsFile", UI.App.Instance.presets.Selected.FileName);
                 cfg.AddValue("KSPskin", useKSPskin);
                 cfg.AddValue("X", UI.MainWindow.windowRect.x);
                 cfg.AddValue("Y", UI.MainWindow.windowRect.y);
-                cfg.Save(settingsFile);
+                node = cfg;
+                node.Save(settingsFile);
                 return true;
             }
             catch (Exception e)

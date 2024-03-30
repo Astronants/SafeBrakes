@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Linq;
+using UnityEngine;
 
 namespace SafeBrakes.UI
 {
@@ -16,9 +18,10 @@ namespace SafeBrakes.UI
 
     class MainWindow : MonoBehaviour
     {
-        public IPage Page = new PresetPage();
+        public App app;
+        public IPage Page;
 
-        public static Rect windowRect;
+        public static Rect windowRect = new Rect(0, 0, 0, 0);
         private Vector2 presetsListScroll;
 
         private bool gamepaused;
@@ -28,11 +31,10 @@ namespace SafeBrakes.UI
             enabled = false;
             GameEvents.onGamePause.Add(this.OnGamePause);
             GameEvents.onGameUnpause.Add(this.OnGameUnpause);
-            Page.Update();
-            float x = Mathf.Clamp(Mouse.screenPos.x - 400, 0, Screen.width - UI.MainWindow.windowRect.width);
-            float y = Mathf.Clamp(Mouse.screenPos.y - 50, 0, Screen.height - UI.MainWindow.windowRect.height);
-            windowRect = new Rect(x, y, 0, 0);
-            Settings.Instance.SetWindowPosition(ref windowRect);
+            float x = Mathf.Clamp(Mouse.screenPos.x - 400, 0, Screen.width - windowRect.width);
+            float y = Mathf.Clamp(Mouse.screenPos.y - 50, 0, Screen.height - windowRect.height);
+            windowRect.position = new Vector2(x, y);
+            app.settings.SetWindowPosition(ref windowRect);
         }
 
         public void OnDestroy()
@@ -44,7 +46,7 @@ namespace SafeBrakes.UI
         public void OnGUI()
         {
             if (!enabled || gamepaused) return;
-            if (Settings.Instance.useKSPskin) GUI.skin = HighLogic.Skin;
+            if (app.settings.useKSPskin) GUI.skin = HighLogic.Skin;
 
             Styles.LoadStyles();
 
@@ -57,15 +59,15 @@ namespace SafeBrakes.UI
             {
                 if (GUI.Button(new Rect(windowRect.width - 23f, 3f, 20f, 20f), " X"))
                 {
-                    AppLauncherButton.Instance.appButton.SetFalse(true);
+                    app.button.SetFalse(true);
                 }
                 GUILayout.BeginVertical(GUILayout.Width(220)); // Left panel
                 {
                     Page.Show();
                     if (GUILayout.Button("Settings"))
                     {
-                        if (Page is PresetPage) SetPage(new SettingsPage());
-                        else SetPage(new PresetPage());
+                        if (Page is PresetPage) SetPage(typeof(SettingsPage));
+                        else SetPage(typeof(PresetPage));
                     }
                 }
                 GUILayout.EndVertical();
@@ -74,27 +76,32 @@ namespace SafeBrakes.UI
                     if (GUILayout.Button("Add config"))
                     {
                         string newName = "New config";
+                        int n = 2;
+                        while (app.presets.Exists(cfg => cfg.Name == newName))
+                        {
+                            newName = $"New config {n++}";
+                        }
                         Preset newcfg = new Preset(newName);
-                        newcfg.Save(DirUtils.PresetsDir);
-                        Settings.Instance.Presets.All.Add(newcfg);
-                        Settings.Instance.Presets.current = Settings.Instance.Presets.All[Settings.Instance.Presets.All.Count - 1];
-                        Settings.Instance.Save();
-                        SetPage(new PresetPage());
+                        newcfg.Save();
+                        app.presets.Add(newcfg);
+                        app.presets.Selected = app.presets.Last();
+                        app.settings.Save();
+                        SetPage(typeof(PresetPage));
                     }
                     presetsListScroll = GUILayout.BeginScrollView(presetsListScroll);
-                    foreach (var config in Settings.Instance.Presets.All)
+                    foreach (var config in app.presets)
                     {
-                        if (Settings.Instance.Presets.current == config)
+                        if (app.presets.Selected == config)
                         {
-                            GUILayout.Label(config.name, Styles.selected_button);
+                            GUILayout.Label(config.Name, Styles.selected_button);
                         }
                         else
                         {
-                            if (GUILayout.Button(config.name))
+                            if (GUILayout.Button(config.Name))
                             {
-                                Settings.Instance.Presets.current = config;
-                                Settings.Instance.Save();
-                                SetPage(new PresetPage());
+                                app.presets.Selected = config;
+                                app.settings.Save();
+                                SetPage(typeof(PresetPage));
                             }
                         }
                     }
@@ -106,9 +113,10 @@ namespace SafeBrakes.UI
             GUI.DragWindow();
         }
 
-        public void SetPage(IPage newPage)
+        public void SetPage(Type t)
         {
-            Page = newPage;
+            if (t == typeof(PresetPage) && !(Page is PresetPage)) Page = new PresetPage(this);
+            else if (t == typeof(SettingsPage) && !(Page is SettingsPage)) Page = new SettingsPage(this);
             Page.Update();
         }
 

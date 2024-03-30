@@ -77,14 +77,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DirUtils.cs" />
-    <Compile Include="UI\AppLauncherButton.cs" />
+    <Compile Include="UI\App.cs" />
     <Compile Include="UI\IPage.cs" />
     <Compile Include="UI\PresetPage.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Preset.cs" />
     <Compile Include="UI\MainWindow.cs" />
     <Compile Include="PartModules\SafeAirBrakes.cs" />
-    <Compile Include="PresetsHandler.cs" />
+    <Compile Include="PresetCollection.cs" />
     <Compile Include="PartModules\SafeBrakes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />

@@ -7,6 +7,13 @@ namespace SafeBrakes.UI
         private bool useKSPskin;
         private Vector2 scroll;
 
+        private readonly MainWindow Parent;
+
+        internal SettingsPage(MainWindow parent)
+        {
+            this.Parent = parent;
+        }
+
         public void Show()
         {
             scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(150));
@@ -14,7 +21,7 @@ namespace SafeBrakes.UI
                 useKSPskin = GUILayout.Toggle(useKSPskin, "use KSP Skin");
                 if (GUILayout.Button("Reload Presets"))
                 {
-                    Settings.Instance.Presets.LoadPresets();
+                    Parent.app.LoadPresets();
                 }
             }
             GUILayout.EndScrollView();
@@ -25,13 +32,13 @@ namespace SafeBrakes.UI
 
         public void Update()
         {
-            this.useKSPskin = Settings.Instance.useKSPskin;
+            this.useKSPskin = Parent.app.settings.useKSPskin;
         }
 
         public void Save()
         {
-            Settings.Instance.useKSPskin = this.useKSPskin;
-            Settings.Instance.Save();
+            Parent.app.settings.useKSPskin = this.useKSPskin;
+            Parent.app.settings.Save();
         }
     }
 }

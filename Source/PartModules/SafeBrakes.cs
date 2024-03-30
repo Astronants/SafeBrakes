@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using SafeBrakes.UI;
+using UnityEngine;
 
 namespace SafeBrakes
 {
@@ -73,15 +74,15 @@ namespace SafeBrakes
             #endregion
 
             #region antilock system
-            if (Settings.Instance.Presets.current != null)
+            if (App.Instance.presets.Selected != null)
             {
                 if (ABSenabled)
                 {
-                    if (!ABSstart && vessel.horizontalSrfSpeed >= Settings.Instance.Presets.current.abs_minSpd && vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes)
+                    if (!ABSstart && vessel.horizontalSrfSpeed >= App.Instance.presets.Selected.abs_minSpd && vessel.ActionGroups[KSPActionGroup.Brakes] != ABSbrakes)
                     {
                         ABSstart = true;
                     }
-                    else if (vessel.horizontalSrfSpeed < Settings.Instance.Presets.current.abs_minSpd || vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes)
+                    else if (vessel.horizontalSrfSpeed < App.Instance.presets.Selected.abs_minSpd || vessel.ActionGroups[KSPActionGroup.Brakes] == ABSbrakes)
                     {
                         ABSstart = false;
                     }
@@ -101,7 +102,7 @@ namespace SafeBrakes
             {
                 if (vessel.LandedOrSplashed)
                 {
-                    UI.AppLauncherButton.Instance.ABS_active(true);
+                    UI.App.Instance.ABS_active(true);
 
                     ABStime += Time.deltaTime;
                     if (ABStime >= ABSrate)
@@ -119,7 +120,7 @@ namespace SafeBrakes
             }
             else
             {
-                UI.AppLauncherButton.Instance.ABS_active(false);
+                UI.App.Instance.ABS_active(false);
             }
         }
 

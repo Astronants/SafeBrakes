@@ -1,4 +1,7 @@
 ﻿using KSP.UI.Screens;
+using System.Collections.Generic;
+using System.IO;
+using System;
 using UnityEngine;
 
 namespace SafeBrakes.UI
@@ -27,12 +30,13 @@ namespace SafeBrakes.UI
     }
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class AppLauncherButton : MonoBehaviour
+    internal class App : MonoBehaviour
     {
-        private static AppLauncherButton instance;
-        public static AppLauncherButton Instance => instance;
+        private static App instance;
+        public static App Instance => instance;
 
         internal MainWindow Window { get; private set; }
+
 
         private enum IconStyle
         {
@@ -43,13 +47,37 @@ namespace SafeBrakes.UI
         }
         private IconStyle currentIcon = IconStyle.NORMAL;
 
-        public ApplicationLauncherButton appButton;
+        public ApplicationLauncherButton button;
+        internal readonly Settings settings = new Settings();
+        internal PresetCollection presets = new PresetCollection();
 
         public void Start()
         {
             instance = this;
             GameEvents.onGUIApplicationLauncherReady.Add(this.CreateAppButton);
             GameEvents.onGUIApplicationLauncherUnreadifying.Add(this.DestroyAppButton);
+            LoadPresets();
+        }
+
+        public void LoadPresets()
+        {
+            presets.Clear();
+            foreach (var file in Directory.GetFiles(DirUtils.PresetsDir, "*.cfg"))
+            {
+                try
+                {
+                    Preset cfg = Preset.Load(file);
+                    if (cfg.FileName == "Default.cfg") presets.Insert(0, cfg);
+                    else presets.Add(cfg);
+                }
+                catch (Exception e)
+                {
+                    Logger.Error($"{Path.GetFileName(file)}: an error has occured while loading the config.", e);
+                }
+            }
+
+            settings.SetSelectedPreset(ref presets);
+            settings.Save();
         }
 
         public void OnDestroy()
@@ -68,45 +96,47 @@ namespace SafeBrakes.UI
         }
         private void DestroyAppButton()
         {
-            if (appButton != null)
+            if (button != null)
             {
                 Logger.Log("Destroying app button.");
-                ApplicationLauncher.Instance.RemoveModApplication(appButton);
-                Destroy(appButton);
-                appButton = null;
+                ApplicationLauncher.Instance.RemoveModApplication(button);
+                Destroy(button);
+                button = null;
             }
         }
 
         private void CreateAppButton()
         {
-            if (appButton == null)
-            {
-                Logger.Log("Creating app button.");
+            if (button != null) return;
 
-                appButton = ApplicationLauncher.Instance.AddModApplication(
-                    OnButtonTrue,   //onTrue
-                    OnButtonFalse,  //onFalse
-                    null,           //onHover
-                    null,           //onHoverOut
-                    null,           //onEnable
-                    null,           //onDisable
-                    ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
-                    AppIcons.Normal
-                    );
-            }
+            Logger.Log("Creating app button.");
+            button = ApplicationLauncher.Instance.AddModApplication(
+                OnButtonTrue,   //onTrue
+                OnButtonFalse,  //onFalse
+                null,           //onHover
+                null,           //onHoverOut
+                null,           //onEnable
+                null,           //onDisable
+                ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
+                AppIcons.Normal
+                );
         }
 
         private void OnButtonTrue()
         {
-            if (Window == null) Window = gameObject.AddComponent<UI.MainWindow>();
-            Settings.Instance.Presets.LoadPresets();
+            if (Window == null)
+            {
+                Window = gameObject.AddComponent<MainWindow>();
+                Window.app = this;
+                Window.SetPage(typeof(PresetPage));
+            }
             Window.enabled = true;
         }
 
         private void OnButtonFalse()
         {
+            settings.Save();
             Window.enabled = false;
-            Settings.Instance.Save();
         }
 
         public void ABS_active(bool state)
@@ -137,23 +167,23 @@ namespace SafeBrakes.UI
 
         private void ChangeIcon(IconStyle style)
         {
-            if (appButton == null) return;
+            if (button == null) return;
             switch (style)
             {
                 case IconStyle.ABS:
-                    appButton.SetTexture(AppIcons.ABS);
+                    button.SetTexture(AppIcons.ABS);
                     currentIcon = IconStyle.ABS;
                     break;
                 case IconStyle.SAB:
-                    appButton.SetTexture(AppIcons.SAB);
+                    button.SetTexture(AppIcons.SAB);
                     currentIcon = IconStyle.SAB;
                     break;
                 case IconStyle.ACTIVE:
-                    appButton.SetTexture(AppIcons.Active);
+                    button.SetTexture(AppIcons.Active);
                     currentIcon = IconStyle.ACTIVE;
                     break;
                 default:
-                    appButton.SetTexture(AppIcons.Normal);
+                    button.SetTexture(AppIcons.Normal);
                     currentIcon = IconStyle.NORMAL;
                     break;
             }

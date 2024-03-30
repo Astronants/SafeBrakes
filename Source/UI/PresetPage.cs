@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using LibNoise.Modifiers;
+using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace SafeBrakes.UI
@@ -11,6 +13,13 @@ namespace SafeBrakes.UI
         private string SabHigh;
         private string SabLow;
         private static Vector2 scroll;
+
+        private readonly MainWindow Parent;
+
+        internal PresetPage(MainWindow parent)
+        {
+            this.Parent = parent;
+        }
 
         private string NameInput(string var)
         {
@@ -33,7 +42,6 @@ namespace SafeBrakes.UI
 
         public void Show()
         {
-            var presets = Settings.Instance.Presets;
             scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(150));
             {
                 Name = NameInput(Name);
@@ -46,15 +54,15 @@ namespace SafeBrakes.UI
             GUILayout.BeginHorizontal();
             {
                 if (GUILayout.Button("Save")) Save();
-                if ((presets.current.FileName != PresetsHandler.defaultPreset) && presets.All.Count > 1 && GUILayout.Button("Delete", Styles.orange_button, GUILayout.ExpandWidth(false)))
+                if ((Parent.app.presets.Selected.FileName != "Default.cfg") && Parent.app.presets.Count > 1 && GUILayout.Button("Delete", Styles.orange_button, GUILayout.ExpandWidth(false)))
                 {
                     PopupDialog.SpawnPopupDialog(
                         new MultiOptionDialog("SafeBrakesConfirmDeletion",
-                            $"Are you sure you want to delete {presets.current.name}?",
+                            $"Are you sure you want to delete {Parent.app.presets.Selected.Name}?",
                             "",
                             HighLogic.UISkin,
                             new DialogGUIButton("Cancel", () => { return; }),
-                            new DialogGUIButton("Yes", presets.Delete)),
+                            new DialogGUIButton("Yes", () => { Parent.app.presets.Remove(Parent.app.presets.Selected); Parent.app.presets.Selected = Parent.app.presets.FirstOrDefault(); })),
                         false,
                         HighLogic.UISkin);
                     Update();
@@ -65,17 +73,15 @@ namespace SafeBrakes.UI
 
         public void Update()
         {
-            Preset current = Settings.Instance.Presets.current;
-            this.Name = current.name;
-            this.AbsMin = current.abs_minSpd.ToString();
-            this.SabAllow = current.allow_sab;
-            this.SabHigh = current.sab_highT.ToString();
-            this.SabLow = current.sab_lowT.ToString();
+            this.Name = Parent.app.presets.Selected.Name;
+            this.AbsMin = Parent.app.presets.Selected.abs_minSpd.ToString();
+            this.SabAllow = Parent.app.presets.Selected.allow_sab;
+            this.SabHigh = Parent.app.presets.Selected.sab_highT.ToString();
+            this.SabLow = Parent.app.presets.Selected.sab_lowT.ToString();
         }
 
         public void Save()
         {
-            var presets = Settings.Instance.Presets;
             // Validate inputs
             Regex floatRegex = new Regex("[0-9]+$");
             if (string.IsNullOrWhiteSpace(Name) || Name.Contains("/") || Name.Contains("\\"))
@@ -89,13 +95,13 @@ namespace SafeBrakes.UI
                 return;
             }
             // Apply changes to chosen preset
-            presets.current.name = Name;
-            try { presets.current.abs_minSpd = float.Parse(AbsMin); } catch { }
-            presets.current.allow_sab = SabAllow;
-            try { presets.current.sab_highT = float.Parse(SabHigh); } catch { }
-            try { presets.current.sab_lowT = float.Parse(SabLow); } catch { }
+            Parent.app.presets.Selected.Name = Name;
+            try { Parent.app.presets.Selected.abs_minSpd = float.Parse(AbsMin); } catch { }
+            Parent.app.presets.Selected.allow_sab = SabAllow;
+            try { Parent.app.presets.Selected.sab_highT = float.Parse(SabHigh); } catch { }
+            try { Parent.app.presets.Selected.sab_lowT = float.Parse(SabLow); } catch { }
             // Save cfg
-            if (presets.Save())
+            if (Parent.app.presets.Selected.Save())
                 ScreenMessages.PostScreenMessage($"[{Logger.modName}]: Config saved.", 5, ScreenMessageStyle.UPPER_CENTER);
             else
                 ScreenMessages.PostScreenMessage($"[{Logger.modName}]: An error has occured while saving the preset.", 5, ScreenMessageStyle.UPPER_CENTER, Color.yellow);
