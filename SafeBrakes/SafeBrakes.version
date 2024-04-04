@@ -4,17 +4,12 @@
 	"DOWNLOAD": "https://spacedock.info/mod/2127/SafeBrakes",
 	"GITHUB" : {
 		"USERNAME": "Astronants",
-		"REPOSITORY": "Safebrakes"
+		"REPOSITORY": "SafeBrakes"
 	},
-	"VERSION": {
+    "VERSION": {
         "MAJOR": 1,
         "MINOR": 1,
-        "PATCH": 5
-    },
-    "KSP_VERSION": {
-        "MAJOR": 1,
-        "MINOR": 8,
-        "PATCH": 1
+        "PATCH": 6
     },
     "KSP_VERSION_MIN": {
         "MAJOR": 1,
@@ -23,7 +18,7 @@
     },
     "KSP_VERSION_MAX": {
         "MAJOR": 1,
-        "MINOR": 8,
+        "MINOR": 12,
         "PATCH": 99
     }
 }
